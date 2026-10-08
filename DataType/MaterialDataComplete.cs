@@ -30,7 +30,7 @@ internal class MaterialDataComplete
                 string name = smr.materials[i].name;
                 name = PmxBuilder.CleanUpNameClone(name);
                 name = ((!pmxBuilder.ignoreList.Contains(name, StringComparer.Ordinal) || !pmxBuilder.ignoreList.Contains(smr.name, StringComparer.Ordinal)) ? (name + " " + PmxBuilder.GetAltInstanceID(smr.transform.parent.gameObject)) : name);
-                name = PmxBuilder.GetAltMaterialName(pmxBuilder, name);
+                name = PmxBuilder.GetAltMaterialName(pmxBuilder, name, false);
                 MaterialInformation.Add(new MaterialInfo(smr.materials[i], name));
             }
         }

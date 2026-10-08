@@ -373,7 +373,7 @@ internal class PmxBuilder
         }
 
         string[] ignoredSMRs = { "cf_O_gag_eye_00", "cf_O_gag_eye_01", "cf_O_gag_eye_02", "Highlight_o_body_a_rend", "Highlight_cf_O_face_rend", "o_Mask", "cf_O_namida_L", "cf_O_namida_M", "cf_O_namida_S" };
-		string[] multiTexShaders = { "AL/skin_head", "AL/skin_body"};
+		string[] multiTexShaders = { "AL/skin_head", "AL/skin_body" };
 		Dictionary<string, string> swappedShaders = new()
         {
             { "LIF/lif_main_cloth", "AL/cloth" }
@@ -516,30 +516,30 @@ internal class PmxBuilder
                     {
                         material.SetTexture("_DetailNormal", null);
                     }
-					if (material.HasProperty("_Matcap_mask"))
-					{
-						material.SetTexture("_Matcap_mask", null);
-					}
-					if (material.HasProperty("_Mat_cap_01"))
-					{
-						material.SetTexture("_Mat_cap_01", null);
-					}
-					if (material.HasProperty("_Mat_cap_02"))
-					{
-						material.SetTexture("_Mat_cap_02", null);
-					}
-					if (material.HasProperty("_Mat_cap_03"))
-					{
-						material.SetTexture("_Mat_cap_03", null);
-					}
-					if (material.HasProperty("unity_Lightmaps"))
-					{
-						material.SetTexture("unity_Lightmaps", null);
-					}
-					if (material.HasProperty("unity_LightmapsInd"))
-					{
-						material.SetTexture("unity_LightmapsInd", null);
-					}
+					//if (material.HasProperty("_Matcap_mask"))
+					//{
+					//	material.SetTexture("_Matcap_mask", null);
+					//}
+					//if (material.HasProperty("_Mat_cap_01"))
+					//{
+					//	material.SetTexture("_Mat_cap_01", null);
+					//}
+					//if (material.HasProperty("_Mat_cap_02"))
+					//{
+					//	material.SetTexture("_Mat_cap_02", null);
+					//}
+					//if (material.HasProperty("_Mat_cap_03"))
+					//{
+					//	material.SetTexture("_Mat_cap_03", null);
+					//}
+					//if (material.HasProperty("unity_Lightmaps"))
+					//{
+					//	material.SetTexture("unity_Lightmaps", null);
+					//}
+					//if (material.HasProperty("unity_LightmapsInd"))
+					//{
+					//	material.SetTexture("unity_LightmapsInd", null);
+					//}
 					if (material.HasProperty("_Normal"))
                     {
                         material.SetTexture("_Normal", null);
@@ -2265,19 +2265,25 @@ internal class PmxBuilder
 		return stringBuilder2.ToString();
 	}
 
-	public static string GetAltMaterialName(PmxBuilder pmxBuilder, string materialName)
+	public static string GetAltMaterialName(PmxBuilder pmxBuilder, string materialName,bool addFlag=true)
 	{
-		if (currentMaterialList.TryGetValue(materialName, out var value))
+		if (currentMaterialList.TryGetValue(materialName, out var value) && (addFlag || value > 0))
 		{
 			if (!pmxBuilder.ignoreList.Contains(materialName))
 			{
-				currentMaterialList[materialName] = value + 1;
+				if (addFlag)
+                {
+                    currentMaterialList[materialName] = value + 1;
+                }
 				materialName = materialName + " " + value.ToString("00");
 			}
 		}
 		else
 		{
-			currentMaterialList.Add(materialName, value);
+			if (addFlag)
+            {
+                currentMaterialList.Add(materialName, value);
+            }
 		}
 		return materialName;
 	}
