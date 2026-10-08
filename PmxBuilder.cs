@@ -31,7 +31,7 @@ internal class PmxBuilder
 		"cf_O_canine", "cf_O_mayuge", "cf_O_noseline", "cf_O_eyeline", "cf_O_eyeline_low", "cf_O_namida_L", "cf_O_namida_M", "cf_O_namida_S", "cf_Ohitomi_L", "cf_Ohitomi_R",
 		"cf_Ohitomi_L02", "cf_Ohitomi_R02", "cf_O_gag_eye_00", "cf_O_gag_eye_01", "cf_O_gag_eye_02", "o_tang", "cf_O_face_atari", "o_tango", "o_nail_def01", "o_nail_foot", 
 		"cf_m_body_00", "cf_m_head_00", "cf_O_eyelash_up", "cf_m_eyelash_up_00", "cf_O_eyelid", "cf_m_eyelid_00", "cf_m_hitomi_00_L", "cf_m_hitomi_00_R", "cf_O_hitomi_L", "cf_O_hitomi_R",
-        "cf_m_namida", "cf_O_namida_L", "cf_O_namida_M", "cf_O_namida_S", "cf_m_tango", "m_al_body_all", "o_lower_type01", "o_upper_type01", "m_al_body_all_cm"
+        "cf_m_namida", "cf_O_namida_L", "cf_O_namida_M", "cf_O_namida_S", "cf_m_tango",  "o_lower_type01", "o_upper_type01", "m_al_body_all_cm", "m_al_head_00"
     };
 
 	public string EyeMatName = "cf_m_hitomi_00";
@@ -568,6 +568,10 @@ internal class PmxBuilder
                     {
                         material.SetTexture("_Highlight_texture_03", null);
                     }
+                    if (material.HasTexture("_Create_dent_texture"))
+                    {
+                        material.SetTexture("_Create_dent_texture", null);
+                    }
 
                     Color32[] lightColor;
                     Color32[] darkColor;
@@ -789,7 +793,7 @@ internal class PmxBuilder
                             float maxY = float.NegativeInfinity;
                             for (int uv = 0; uv < uvs.Length; uv++)
                             {
-                                verts[uv] = new UnityEngine.Vector3(-uvs[uv].x, uvs[uv].y, 0f);
+                                verts[uv] = new UnityEngine.Vector3(uvs[uv].x, uvs[uv].y, 0f);
                                 minX = Mathf.Min(minX, uvs[uv].x);
                                 maxX = Mathf.Max(maxX, uvs[uv].x);
                                 minY = Mathf.Min(minY, uvs[uv].y);
@@ -834,7 +838,7 @@ internal class PmxBuilder
                             mesh.RecalculateNormals();
                             mesh.RecalculateTangents();
 
-                            positionFront = new UnityEngine.Vector3(xOffset + horizontalBlockCount / 2.0f, yOffset + verticalBlockCount / 2.0f, 0f) + cameraOffset;
+                            positionFront = new UnityEngine.Vector3(-xOffset - horizontalBlockCount / 2.0f, yOffset + verticalBlockCount / 2.0f, 0f) + cameraOffset;
                         }
                         _camera.orthographicSize = verticalBlockCount / 2.0f;
                         _camera.aspect = (float)horizontalBlockCount / verticalBlockCount;
@@ -877,6 +881,7 @@ internal class PmxBuilder
                         }
 
                         overlay1 = render(lightRotation, lightPosition, submeshIndex, mesh, texturewidth, textureheight, _overlay, _camera);
+                        
                         if (overlay2 != null)
 						{
                             overlay2 = render(darkRotation, lightPosition, submeshIndex, mesh, texturewidth, textureheight, _overlay, _camera);
