@@ -133,7 +133,7 @@ internal class PmxBuilder
 			if (nowCoordinate < maxCoord)
 			{
                 human.Coorde.ChangeCoordinateType((HumanCoordinate.Define.CoordinateType)nowCoordinate);
-				human.ReloadCoordinate();                
+				human.ReloadCoordinate();
                 yield return new WaitForSeconds(2f);
 			}
             BuildStart_BG();
@@ -151,12 +151,16 @@ internal class PmxBuilder
 		{
 			ResetPmxBuilder();
 			CreateModelInfo();
-			CreateInstanceIDs();
+            if (nowCoordinate < maxCoord)
+            {
+                ClearMorphs();
+            }
+            CreateInstanceIDs();
             SetSavePath();
             Directory.CreateDirectory(currentSavePath);
             Directory.CreateDirectory(currentSavePath + "/pre_light");
             Directory.CreateDirectory(currentSavePath + "/pre_dark");
-            ClearMorphs();
+            
 
             if (nowCoordinate < maxCoord)
             {
@@ -551,10 +555,18 @@ internal class PmxBuilder
                     {
                         material.SetTexture("_Cloth_alpha_bot", null);
                     }
-					if (material.HasProperty("_Highlight_texture"))
+					if (material.HasProperty("_Highlight_texture_01"))
 					{
-						material.SetTexture("_Highlight_texture", null);
+						material.SetTexture("_Highlight_texture_01", null);
 					}
+                    if (material.HasProperty("_Highlight_texture_02"))
+                    {
+                        material.SetTexture("_Highlight_texture_02", null);
+                    }
+                    if (material.HasProperty("_Highlight_texture_03"))
+                    {
+                        material.SetTexture("_Highlight_texture_03", null);
+                    }
 
                     Color32[] lightColor;
                     Color32[] darkColor;
@@ -1061,7 +1073,7 @@ internal class PmxBuilder
 		human.Body.animBody.speed = 0f;
 
 		// Need a T-Pose mod
-		human.Body.animBody.Play(human.Body .animBody.runtimeAnimatorController.animationClips[0].name);
+		human.Body.animBody.Play(human.Body.animBody.runtimeAnimatorController.animationClips[0].name);
 	}
 
     public void CreateBaseSavePath()
@@ -2210,7 +2222,7 @@ internal class PmxBuilder
 	{
 		if (instanceIDs.TryGetValue(_object.GetInstanceID(), out var value) && value >= 0)
 		{
-			int.TryParse(value.ToString() + nowCoordinate, out value);
+			int.TryParse(value.ToString() + (nowCoordinate == maxCoord ? nowCoordinate - 1 : nowCoordinate), out value);
 			return value;
 		}
 		Console.WriteLine("No ID Found");
