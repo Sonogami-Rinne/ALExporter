@@ -126,6 +126,7 @@ internal class PmxBuilder
 		yield return new WaitForSeconds(0.4f);
 		Prepare();
         nowCoordinate = exportAllOutfits ? 0 : human.FileStatus.coordinateType;
+        minCoord = nowCoordinate;
 		maxCoord = exportAllOutfits ? human.Coorde._data.Coordinates.Length : nowCoordinate + 1;
 
         for (; nowCoordinate < maxCoord + 1; nowCoordinate++)
@@ -2222,7 +2223,7 @@ internal class PmxBuilder
 	{
 		if (instanceIDs.TryGetValue(_object.GetInstanceID(), out var value) && value >= 0)
 		{
-			int.TryParse(value.ToString() + (nowCoordinate == maxCoord ? nowCoordinate - 1 : nowCoordinate), out value);
+			int.TryParse(value.ToString() + nowCoordinate, out value);
 			return value;
 		}
 		Console.WriteLine("No ID Found");
