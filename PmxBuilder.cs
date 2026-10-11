@@ -31,7 +31,7 @@ internal class PmxBuilder
 		"cf_O_canine", "cf_O_mayuge", "cf_O_noseline", "cf_O_eyeline", "cf_O_eyeline_low", "cf_O_namida_L", "cf_O_namida_M", "cf_O_namida_S", "cf_Ohitomi_L", "cf_Ohitomi_R",
 		"cf_Ohitomi_L02", "cf_Ohitomi_R02", "cf_O_gag_eye_00", "cf_O_gag_eye_01", "cf_O_gag_eye_02", "o_tang", "cf_O_face_atari", "o_tango", "o_nail_def01", "o_nail_foot", 
 		"cf_m_body_00", "cf_m_head_00", "cf_O_eyelash_up", "cf_m_eyelash_up_00", "cf_O_eyelid", "cf_m_eyelid_00", "cf_m_hitomi_00_L", "cf_m_hitomi_00_R", "cf_O_hitomi_L", "cf_O_hitomi_R",
-        "cf_m_namida", "cf_O_namida_L", "cf_O_namida_M", "cf_O_namida_S", "cf_m_tango",  "o_lower_type01", "o_upper_type01", "m_al_body_all_cm", "m_al_head_00"
+        "cf_m_namida", "cf_O_namida_L", "cf_O_namida_M", "cf_O_namida_S", "cf_m_tango",  "o_lower_type01", "o_upper_type01", "o_lower_type02", "o_upper_type02", "o_lower_type03", "o_upper_type03", "o_lower_type04", "o_upper_type04", "m_al_body_all_cm", "m_al_head_00"
     };
 
 	public string EyeMatName = "cf_m_hitomi_00";
@@ -259,10 +259,10 @@ internal class PmxBuilder
 		square.vertices = vertices;
 
         Il2CppInterop.Runtime.InteropTypes.Arrays.Il2CppStructArray<UnityEngine.Vector2> uvs = new Il2CppInterop.Runtime.InteropTypes.Arrays.Il2CppStructArray<UnityEngine.Vector2>(4);
-		uvs[0] = new UnityEngine.Vector2(-0.001f, -0.001f);
-		uvs[1] = new UnityEngine.Vector2(-0.001f, 1.001f);
-		uvs[2] = new UnityEngine.Vector2(1.001f, 1.001f);
-		uvs[3] = new UnityEngine.Vector2(1.001f, -0.001f);
+		uvs[0] = new UnityEngine.Vector2(1.001f, -0.001f);
+		uvs[1] = new UnityEngine.Vector2(1.001f, 1.001f);
+		uvs[2] = new UnityEngine.Vector2(-0.001f, 1.001f);
+		uvs[3] = new UnityEngine.Vector2(-0.001f, -0.001f);
 
 		square.uv = uvs;
 
@@ -373,8 +373,9 @@ internal class PmxBuilder
         }
 
         string[] ignoredSMRs = { "cf_O_gag_eye_00", "cf_O_gag_eye_01", "cf_O_gag_eye_02", "Highlight_o_body_a_rend", "Highlight_cf_O_face_rend", "o_Mask", "cf_O_namida_L", "cf_O_namida_M", "cf_O_namida_S" };
-		string[] multiTexShaders = { "AL/skin_head", "AL/skin_body" };
-		Dictionary<string, string> swappedShaders = new()
+		string[] multiTexShaders = { "AL/skin_head", "AL/skin_body"};
+
+        Dictionary<string, string> swappedShaders = new()
         {
             { "LIF/lif_main_cloth", "AL/cloth" }
         };
@@ -498,17 +499,17 @@ internal class PmxBuilder
                     {
                         mainTex = material.GetTexture("_Create_main_texture");
                     }
-					else if (material.HasProperty("_eyebrow_texture"))
-					{
-						mainTex = material.GetTexture("_eyebrow_texture");
+                    else if (material.HasProperty("_eyebrow_texture"))
+                    {
+                        mainTex = material.GetTexture("_eyebrow_texture");
                     }
-					else if (material.HasProperty("_Eyelash_up_texture"))
-					{
-						mainTex = material.GetTexture("_Eyelash_up_texture");
+                    else if (material.HasProperty("_Eyelash_up_texture"))
+                    {
+                        mainTex = material.GetTexture("_Eyelash_up_texture");
                     }
-					else if (material.HasProperty("_Eyelash_dw_texture"))
-					{
-						mainTex = material.GetTexture("_Eyelash_dw_texture");
+                    else if (material.HasProperty("_Eyelash_dw_texture"))
+                    {
+                        mainTex = material.GetTexture("_Eyelash_dw_texture");
                     }
                     int baseLength = mainTex != null ? Math.Max(mainTex.width, mainTex.height) : 2048;
 
@@ -516,31 +517,31 @@ internal class PmxBuilder
                     {
                         material.SetTexture("_DetailNormal", null);
                     }
-					//if (material.HasProperty("_Matcap_mask"))
-					//{
-					//	material.SetTexture("_Matcap_mask", null);
-					//}
-					//if (material.HasProperty("_Mat_cap_01"))
-					//{
-					//	material.SetTexture("_Mat_cap_01", null);
-					//}
-					//if (material.HasProperty("_Mat_cap_02"))
-					//{
-					//	material.SetTexture("_Mat_cap_02", null);
-					//}
-					//if (material.HasProperty("_Mat_cap_03"))
-					//{
-					//	material.SetTexture("_Mat_cap_03", null);
-					//}
-					//if (material.HasProperty("unity_Lightmaps"))
-					//{
-					//	material.SetTexture("unity_Lightmaps", null);
-					//}
-					//if (material.HasProperty("unity_LightmapsInd"))
-					//{
-					//	material.SetTexture("unity_LightmapsInd", null);
-					//}
-					if (material.HasProperty("_Normal"))
+                    //if (material.HasProperty("_Matcap_mask"))
+                    //{
+                    //	material.SetTexture("_Matcap_mask", null);
+                    //}
+                    //if (material.HasProperty("_Mat_cap_01"))
+                    //{
+                    //	material.SetTexture("_Mat_cap_01", null);
+                    //}
+                    //if (material.HasProperty("_Mat_cap_02"))
+                    //{
+                    //	material.SetTexture("_Mat_cap_02", null);
+                    //}
+                    //if (material.HasProperty("_Mat_cap_03"))
+                    //{
+                    //	material.SetTexture("_Mat_cap_03", null);
+                    //}
+                    //if (material.HasProperty("unity_Lightmaps"))
+                    //{
+                    //	material.SetTexture("unity_Lightmaps", null);
+                    //}
+                    //if (material.HasProperty("unity_LightmapsInd"))
+                    //{
+                    //	material.SetTexture("unity_LightmapsInd", null);
+                    //}
+                    if (material.HasProperty("_Normal"))
                     {
                         material.SetTexture("_Normal", null);
                     }
@@ -556,10 +557,10 @@ internal class PmxBuilder
                     {
                         material.SetTexture("_Cloth_alpha_bot", null);
                     }
-					if (material.HasProperty("_Highlight_texture_01"))
-					{
-						material.SetTexture("_Highlight_texture_01", null);
-					}
+                    if (material.HasProperty("_Highlight_texture_01"))
+                    {
+                        material.SetTexture("_Highlight_texture_01", null);
+                    }
                     if (material.HasProperty("_Highlight_texture_02"))
                     {
                         material.SetTexture("_Highlight_texture_02", null);
@@ -571,6 +572,10 @@ internal class PmxBuilder
                     if (material.HasTexture("_Create_dent_texture"))
                     {
                         material.SetTexture("_Create_dent_texture", null);
+                    }
+                    if (material.HasFloat("_Line_width"))
+                    {
+                        material.SetFloat("_Line_width", 0f);
                     }
 
                     Color32[] lightColor;
