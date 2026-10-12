@@ -399,6 +399,7 @@ internal class PmxBuilder
         UnityEngine.Vector3 darkPosition = new UnityEngine.Vector3(1.6003105E-06f, 42.88584f, 18.385326f);
         UnityEngine.Vector3 cameraOffset = new UnityEngine.Vector3(0f, 13f, 21f);
         Matrix4x4 drawOffset = Matrix4x4.TRS(new UnityEngine.Vector3(0f, 13f, 20f), new UnityEngine.Quaternion(0f, 1f, 0f, 0f), UnityEngine.Vector3.one);
+        Matrix4x4 drawOffset2 = Matrix4x4.TRS(new UnityEngine.Vector3(0f, 13f, 19f), new UnityEngine.Quaternion(0f, 1f, 0f, 0f), UnityEngine.Vector3.one);
         Mesh square = gameObjectMeshContainer.GetComponent<MeshFilter>().sharedMesh;
         cameraMain.transform.rotation = new UnityEngine.Quaternion(0, 1, 0, 0);
         auxiliaryCamera.transform.rotation = new UnityEngine.Quaternion(0, 1, 0, 0);
@@ -429,6 +430,7 @@ internal class PmxBuilder
             Transform probeAnchor;
             ShadowCastingMode probeCastingMode;
             MaterialPropertyBlock materialPropertyBlock = new MaterialPropertyBlock();
+            MaterialPropertyBlock materialPropertyBlock1 = new MaterialPropertyBlock();
             bool receiveShadow;
 			bool isSMR = false;
             if (smr.GetType().Name == "SkinnedMeshRenderer")
@@ -441,7 +443,7 @@ internal class PmxBuilder
                 probeCastingMode = _tmp.shadowCastingMode;
                 receiveShadow = _tmp.receiveShadows;
                 _tmp.GetPropertyBlock(materialPropertyBlock);
-
+                _tmp.GetPropertyBlock(materialPropertyBlock1);
             }
 			else
 			{
@@ -453,8 +455,9 @@ internal class PmxBuilder
 				probeCastingMode = _tmp.shadowCastingMode;
 				receiveShadow = _tmp.receiveShadows;
 				_tmp.GetPropertyBlock(materialPropertyBlock);
+                _tmp.GetPropertyBlock(materialPropertyBlock1);
 
-			}
+            }
             int subMeshCount = originalMesh.subMeshCount;
             int layer = smr.gameObject.layer;// Do not forget to drawmesh in this layer
 
@@ -463,7 +466,15 @@ internal class PmxBuilder
 			UnityEngine.Vector3 positionFront = new UnityEngine.Vector3();
 			bool modifiedMesh = false;
 
-			for (int j = 0; j < smr.sharedMaterials.Length; j++)
+
+            camera.orthographicSize = 0.5f;
+            camera.aspect = 1f;
+            camera.transform.position = new UnityEngine.Vector3(-0.5f, 0.5f, 0f) + cameraOffset;
+            cameraMain.transform.position = camera.transform.position;
+            camera.transform.hasChanged = true;
+            cameraMain.transform.hasChanged = true;
+
+            for (int j = 0; j < smr.sharedMaterials.Length; j++)
             {
 				int submeshIndex = Math.Min(j, subMeshCount);
                 if (meshRenders[i].sharedMaterials[j] == null || ignoredShaders.Contains(meshRenders[i].sharedMaterials[j].shader.name)) continue;
@@ -517,30 +528,6 @@ internal class PmxBuilder
                     {
                         material.SetTexture("_DetailNormal", null);
                     }
-                    //if (material.HasProperty("_Matcap_mask"))
-                    //{
-                    //	material.SetTexture("_Matcap_mask", null);
-                    //}
-                    //if (material.HasProperty("_Mat_cap_01"))
-                    //{
-                    //	material.SetTexture("_Mat_cap_01", null);
-                    //}
-                    //if (material.HasProperty("_Mat_cap_02"))
-                    //{
-                    //	material.SetTexture("_Mat_cap_02", null);
-                    //}
-                    //if (material.HasProperty("_Mat_cap_03"))
-                    //{
-                    //	material.SetTexture("_Mat_cap_03", null);
-                    //}
-                    //if (material.HasProperty("unity_Lightmaps"))
-                    //{
-                    //	material.SetTexture("unity_Lightmaps", null);
-                    //}
-                    //if (material.HasProperty("unity_LightmapsInd"))
-                    //{
-                    //	material.SetTexture("unity_LightmapsInd", null);
-                    //}
                     if (material.HasProperty("_Normal"))
                     {
                         material.SetTexture("_Normal", null);
@@ -573,16 +560,9 @@ internal class PmxBuilder
                     {
                         material.SetTexture("_Create_dent_texture", null);
                     }
-                    if (material.HasFloat("_Line_width"))
-                    {
-                        material.SetFloat("_Line_width", 0f);
-                    }
 
-                    Color32[] lightColor;
-                    Color32[] darkColor;
-					Color32[] lightOverlay = new Color32[0];
-					Color32[] darkOverlay = new Color32[0];
-					//Texture2D image = new Texture2D(baseLength, baseLength, TextureFormat.ARGB32, false);
+                    Color32[] lightColor = null;
+                    Color32[] darkColor = null;
 					Texture2D image;
 					bool customSize = false;
 					switch (baseLength)
@@ -605,59 +585,40 @@ internal class PmxBuilder
 							break;
                     }
 
-					bool isMultiTexShaders = multiTexShaders.Contains(material.shader.name);
-
-                    if (isMultiTexShaders)
-					{
-						renderWithModifiedMesh(ref lightOverlay, ref darkOverlay, camera);
-                        if (this.exportWithMainCamera)
-                        {
-                            Color32[] alphaOverlay = new Color32[0];
-                            Color32[] _ = null;
-                            renderWithModifiedMesh(ref alphaOverlay, ref _, auxiliaryCamera);
-                            lightOverlay = addAlpha(lightOverlay, alphaOverlay);
-                            darkOverlay = addAlpha(darkOverlay, alphaOverlay);
-                        }
+                    if (multiTexShaders.Contains(material.shader.name))
+                    {
+                        renderWithModifiedMesh(camera);
                     }
-                    camera.orthographicSize = 0.5f;
-                    camera.aspect = 1f;
-                    camera.transform.position = new UnityEngine.Vector3(-0.5f, 0.5f, 0f) + cameraOffset;
-					cameraMain.transform.position = camera.transform.position;
-					camera.transform.hasChanged = true;
-					cameraMain.transform.hasChanged = true;
+                    else
+                    {
+                        lightColor = render(lightRotation, lightPosition, 0, square, baseLength, baseLength, image, camera);
+                        darkColor = render(darkRotation, darkPosition, 0, square, baseLength, baseLength, image, camera);
+                    }
 
-                    lightColor = render(lightRotation, lightPosition, 0, square, baseLength, baseLength, image, camera);
-                    darkColor = render(darkRotation, darkPosition, 0, square, baseLength, baseLength, image, camera);
-					if (this.exportWithMainCamera)
-					{
+                    if (this.exportWithMainCamera)
+                    {
                         auxiliaryCamera.orthographicSize = 0.5f;
                         auxiliaryCamera.aspect = 1f;
                         auxiliaryCamera.transform.position = new UnityEngine.Vector3(-0.5f, 0.5f, 0f) + cameraOffset;
-						auxiliaryCamera.transform.hasChanged = true;
-						Color32[] alphaOverlay = render(lightRotation, lightPosition, 0, square, baseLength, baseLength, image, auxiliaryCamera);
-						lightColor = addAlpha(lightColor, alphaOverlay);
-						darkColor = addAlpha(darkColor, alphaOverlay);
-                    }                    
-                    if (isMultiTexShaders)
-					{
-                        blend(lightColor, lightOverlay);
-						blend(darkColor, darkOverlay);
-					}
-					addFlag = checkNotTransparent(lightColor) || checkNotTransparent(darkColor);
+                        auxiliaryCamera.transform.hasChanged = true;
+                        Color32[] alphaOverlay = render(lightRotation, lightPosition, 0, square, baseLength, baseLength, image, auxiliaryCamera);
+                        lightColor = addAlpha(lightColor, alphaOverlay);
+                        darkColor = addAlpha(darkColor, alphaOverlay);
+                    }
+                    addFlag = checkNotTransparent(lightColor) || checkNotTransparent(darkColor);
                     if (addFlag)
-					{
+                    {
                         TextureSaver.SaveTexture(lightColor, baseLength, baseLength, currentSavePath + "/pre_light/" + matName + "_light.png");
                         TextureSaver.SaveTexture(darkColor, baseLength, baseLength, currentSavePath + "/pre_dark/" + matName + "_dark.png");
                     }
-					if (customSize)
-					{
+                    if (customSize)
+                    {
                         Texture2D.DestroyImmediate(image);
                     }
-                    Color32[] render(UnityEngine.Quaternion rotation, UnityEngine.Vector3 position, int subMeshIndex, Mesh mesh, int texturewidth, int textureheight, Texture2D _, Camera camera)
+                    Color32[] render(UnityEngine.Quaternion rotation, UnityEngine.Vector3 position, int subMeshIndex, Mesh _mesh, int texturewidth, int textureheight, Texture2D _, Camera camera, Mesh background=null)
                     {
                         light.transform.rotation = rotation;
                         light.transform.position = position;
-                        //GL.Flush();
 
                         RenderTexture renderTexture = new RenderTexture(texturewidth, textureheight, 24, RenderTextureFormat.ARGB32);
                         renderTexture.antiAliasing = 1;
@@ -666,7 +627,62 @@ internal class PmxBuilder
 
                         camera.targetTexture = renderTexture;
                         camera.backgroundColor = Color.clear;
-                        Graphics.DrawMesh(mesh, drawOffset, material, layer, camera, subMeshIndex, materialPropertyBlock, probeCastingMode, receiveShadow, probeAnchor, probeUsage);
+                        if (background != null)
+                        {
+                            if (material.HasTexture("_Lip_line_texture"))
+                            {
+                                if (!materialPropertyBlock.HasTexture("_Lip_line_texture"))
+                                {
+                                    var tex = material.GetTexture("_Lip_line_texture");
+                                    if (tex != null)
+                                    {
+                                        materialPropertyBlock.SetTexture("_Lip_line_texture", tex);
+                                    }
+                                }
+                                material.SetTexture("_Lip_line_texture", null);
+                            }
+                            if (material.HasTexture("_Nose_texture"))
+                            {
+                                if (!materialPropertyBlock.HasTexture("_Nose_texture")){
+                                    var tex = material.GetTexture("_Nose_texture");
+                                    if (tex != null)
+                                    {
+                                        materialPropertyBlock.SetTexture("_Nose_texture", tex);
+                                    }
+                                }
+                                material.SetTexture("_Nose_texture", null);
+                            }
+                            if (material.HasTexture("_Nip"))
+                            {
+                                if (!materialPropertyBlock.HasTexture("_Nip"))
+                                {
+                                    var tex = material.GetTexture("_Nip");
+                                    if (tex != null)
+                                    {
+                                        materialPropertyBlock.SetTexture("_Nip", tex);
+                                    }
+                                }
+                                material.SetTexture("_Nip", null);
+                            }
+                            if (material.HasTexture("_Under_hair_texture"))
+                            {
+                                if (!materialPropertyBlock.HasTexture("_Under_hair_texture"))
+                                {
+                                    var tex = material.GetTexture("_Under_hair_texture");
+                                    if (tex != null)
+                                    {
+                                        materialPropertyBlock.SetTexture("_Under_hair_texture",tex);
+                                    }
+                                }
+                                material.SetTexture("_Under_hair_texture", null);
+                            }
+                            Graphics.DrawMesh(background, drawOffset2, material, layer, camera, 0, materialPropertyBlock1, probeCastingMode, receiveShadow, probeAnchor, probeUsage);
+                            Graphics.DrawMesh(_mesh, drawOffset, material, layer, camera, subMeshIndex, materialPropertyBlock, probeCastingMode, receiveShadow, probeAnchor, probeUsage);
+                        }
+                        else
+                        {
+                            Graphics.DrawMesh(_mesh, drawOffset, material, layer, camera, subMeshIndex, materialPropertyBlock, probeCastingMode, receiveShadow, probeAnchor, probeUsage);
+                        }
                         camera.Render();
 
                         RenderTexture.active = renderTexture;
@@ -678,17 +694,6 @@ internal class PmxBuilder
                         renderTexture.Release();
                         UnityEngine.Object.Destroy(renderTexture);
                         return data;
-                    }
-
-                    void blend(Color32[] color, Color32[] blend)
-                    {
-                        for (int i = 0; i < color.Length; i++)
-                        {
-                            if (blend[i].a == 255)
-                            {
-                                color[i] = blend[i];
-                            }
-                        }
                     }
 
                     Color32[] shrink(Color32[] overlay)
@@ -747,17 +752,11 @@ internal class PmxBuilder
                         for (int i = 0; i < colors.Length; i++)
                         {
                             colors[i].a = alpha[i].a;
-                            if (colors[i].a == 0)
-                            {
-                                colors[i].r = 0;
-                                colors[i].g = 0;
-                                colors[i].b = 0;
-                            }
                         }
                         return colors;
                     }
 					
-					void renderWithModifiedMesh(ref Color32[] overlay1, ref Color32[] overlay2, Camera _camera)
+					void renderWithModifiedMesh(Camera _camera)
 					{
                         if (!modifiedMesh)
                         {
@@ -835,7 +834,7 @@ internal class PmxBuilder
                                 }
                             }
 
-                            uvIslandSolver(triangles, verts);
+                            //uvIslandSolver(triangles, verts);
 
                             mesh.vertices = verts;
                             mesh.triangles = triangles;
@@ -851,6 +850,11 @@ internal class PmxBuilder
                         _camera.transform.hasChanged = true;
                         cameraMain.transform.hasChanged = true;
                         cameraMain.transform.position = positionFront;
+
+                        square.vertices[0] = new UnityEngine.Vector3(-(positionFront.x - horizontalBlockCount / 2f), positionFront.y - verticalBlockCount / 2.0f, 0);
+                        square.vertices[1] = new UnityEngine.Vector3(-(positionFront.x - horizontalBlockCount / 2f), positionFront.y + verticalBlockCount / 2.0f, 0);
+                        square.vertices[2] = new UnityEngine.Vector3(-(positionFront.x + horizontalBlockCount / 2f), positionFront.y + verticalBlockCount / 2.0f, 0);
+                        square.vertices[3] = new UnityEngine.Vector3(-(positionFront.x + horizontalBlockCount / 2f), positionFront.y - verticalBlockCount / 2.0f, 0);
 
                         int texturewidth = baseLength * horizontalBlockCount;
                         int textureheight = baseLength * verticalBlockCount;
@@ -885,40 +889,29 @@ internal class PmxBuilder
                             overlayCustomSize = true;
                         }
 
-                        overlay1 = render(lightRotation, lightPosition, submeshIndex, mesh, texturewidth, textureheight, _overlay, _camera);
+                        lightColor = render(lightRotation, lightPosition, submeshIndex, mesh, texturewidth, textureheight, _overlay, _camera, square);
                         
-                        if (overlay2 != null)
-						{
-                            overlay2 = render(darkRotation, lightPosition, submeshIndex, mesh, texturewidth, textureheight, _overlay, _camera);
-                        }
+                        darkColor = render(darkRotation, lightPosition, submeshIndex, mesh, texturewidth, textureheight, _overlay, _camera, square);
 
                         if (overlayCustomSize)
                         {
                             Texture2D.DestroyImmediate(_overlay);
                         }
 
-                        overlay1 = shrink(overlay1);
-                        if (overlay2 != null)
-						{
-                            overlay2 = shrink(overlay2);
-                        }
+                        lightColor = shrink(lightColor);
+                        darkColor = shrink(darkColor);
 
-                        if (material.HasProperty("_Lip_line_texture"))
-                        {
-                            material.SetTexture("_Lip_line_texture", null);
-                        }
-                        if (material.HasProperty("_Nose_texture"))
-                        {
-                            material.SetTexture("_Nose_texture", null);
-                        }
-                        if (material.HasProperty("_Nip"))
-                        {
-                            material.SetTexture("_Nip", null);
-                        }
-                        if (material.HasProperty("_Under_hair_texture"))
-                        {
-                            material.SetTexture("_Under_hair_texture", null);
-                        }
+                        camera.orthographicSize = 0.5f;
+                        camera.aspect = 1f;
+                        camera.transform.position = new UnityEngine.Vector3(-0.5f, 0.5f, 0f) + cameraOffset;
+                        cameraMain.transform.position = camera.transform.position;
+                        camera.transform.hasChanged = true;
+                        cameraMain.transform.hasChanged = true;
+
+                        square.vertices[0] = new UnityEngine.Vector3(1.001f, -0.001f, 0f);
+                        square.vertices[1] = new UnityEngine.Vector3(1.001f, 1.001f, 0f);
+                        square.vertices[2] = new UnityEngine.Vector3(-0.001f, 1.001f, 0f);
+                        square.vertices[3] = new UnityEngine.Vector3(-0.001f, -0.001f, 0f);
                     }
 
                     bool checkNotTransparent(Color32[] colors)
@@ -953,116 +946,13 @@ internal class PmxBuilder
             }
             
         }
-		
-		for(int i = 0;i < renders.Length; i++)
-		{
-			renders[i].enabled = renderStatus[i];
-        }
-
         if (mesh != null)
         {
             Mesh.DestroyImmediate(mesh);
         }
-
-        void uvIslandSolver(int[] triangles, UnityEngine.Vector3[] vertices)
-        {
-            int[] parent = new int[vertices.Length];
-            float[] minX = new float[vertices.Length];
-            float[] minY = new float[vertices.Length];
-            float[] maxX = new float[vertices.Length];
-            float[] maxY = new float[vertices.Length];
-
-            int findAndUpdate(int index)
-            {
-                Stack<int> stack = new Stack<int>();
-                while (parent[index] != index)
-                {
-                    stack.Push(index);
-                    index = parent[index];
-                }
-                while (stack.Count > 0)
-                {
-                    int cur = stack.Pop();
-                    parent[cur] = index;
-                }
-                return index;
-            }
-
-            for (int i = 0; i < vertices.Length; i++)
-            {
-                parent[i] = i;
-                var vertex = vertices[i];
-                minX[i] = vertex.x;
-                maxX[i] = vertex.x;
-                minY[i] = vertex.y;
-                maxY[i] = vertex.y;
-            }
-
-            for (int i = 0; i < triangles.Length; i += 3)
-            {
-                var parentIndex = findAndUpdate(parent[triangles[i]]);
-                var _parentIndex1 = findAndUpdate(parent[triangles[i + 1]]);
-                var _parentIndex2 = findAndUpdate(parent[triangles[i + 2]]);
-
-                parent[_parentIndex1] = parentIndex;
-                parent[_parentIndex2] = parentIndex;
-
-                minX[parentIndex] = Math.Min(minX[parentIndex], minX[_parentIndex1]);
-                minX[parentIndex] = Math.Min(minX[parentIndex], minX[_parentIndex2]);
-
-                minY[parentIndex] = Math.Min(minY[parentIndex], minY[_parentIndex1]);
-                minY[parentIndex] = Math.Min(minY[parentIndex], minY[_parentIndex2]);
-
-                maxX[parentIndex] = Math.Max(maxX[parentIndex], maxX[_parentIndex1]);
-                maxX[parentIndex] = Math.Max(maxX[parentIndex], maxX[_parentIndex2]);
-
-                maxY[parentIndex] = Math.Max(maxY[parentIndex], maxY[_parentIndex1]);
-                maxY[parentIndex] = Math.Max(maxY[parentIndex], maxY[_parentIndex2]);
-            }
-            List<List<int>> islands = new List<List<int>>();
-            Dictionary<int, float> offsets = new Dictionary<int, float>();
-
-            for (int i = 0; i < vertices.Length; i++)
-            {
-                int parentIndex = findAndUpdate(parent[i]);
-                if (offsets.TryGetValue(parentIndex, out float offset))
-                {
-                    var _v = vertices[i];
-                    vertices[i] = new UnityEngine.Vector3(_v.x, _v.y, offset);
-                    continue;
-                }
-                offset = 0f;
-                bool flag = false;
-
-                for (int layer = 0; layer < islands.Count; layer++)
-                {
-                    flag = true;
-                    var layerInfo = islands[layer];
-                    for (int j = 0; j < islands[layer].Count; j++)
-                    {
-                        int _parentIndex = layerInfo[j];
-                        if (!(minX[_parentIndex] >= maxX[parentIndex] || maxX[_parentIndex] <= minX[parentIndex] || minY[_parentIndex] >= maxY[parentIndex] || maxY[_parentIndex] <= minY[parentIndex]))
-                        {
-                            flag = false;
-                            break;
-                        }
-                    }
-                    if (flag)
-                    {
-                        offsets.Add(parentIndex, offset);
-                        layerInfo.Add(parentIndex);
-                        var _v = vertices[i];
-                        vertices[i] = new UnityEngine.Vector3(_v.x, _v.y, offset);
-                        break;
-                    }
-                    offset -= 0.0001f;
-                }
-                if (!flag)
-                {
-                    offsets.Add(parentIndex, offset);
-                    islands.Add(new List<int>() { parentIndex });
-                }
-            }
+        for (int i = 0;i < renders.Length; i++)
+		{
+			renders[i].enabled = renderStatus[i];
         }
     }
     public static void ChangeAnimations()
