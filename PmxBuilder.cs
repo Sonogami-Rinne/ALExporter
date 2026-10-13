@@ -16,11 +16,198 @@ using System.Reflection;
 using System.Text;
 using UnityEngine;
 using UnityEngine.Rendering;
-using UnityEngine.Rendering.Universal;
 
 
 internal class PmxBuilder
 {
+    //public static int index = 0;
+    //static UnityEngine.Vector3 positionFront;
+    //static float pa0 = 0f;
+    //static float pa1 = 0f;
+    //public static void Test()
+    //{
+    //    // 263
+    //    GameObject globalVolume = GameObject.Find("Global Volume");
+    //    var _parameter = globalVolume.GetComponent<Volume>().m_InternalProfile.components[0].parameters[PmxBuilder.index];
+    //    Console.WriteLine($"{index}   {_parameter.ToString()}");
+    //    var codes = File.ReadAllLines("E:\\code.txt");
+    //    if (codes.Length == 0)
+    //    {
+    //        return;
+    //    }
+    //    var code = codes[0].Trim();
+    //    FloatParameter tmp0 = _parameter.TryCast<FloatParameter>();
+    //    if (tmp0 != null)
+    //    {
+    //        tmp0.overrideState = true;
+    //        try
+    //        {
+    //            tmp0.value = float.Parse(code);
+    //        }
+    //        catch(Exception ex) {
+    //            Console.WriteLine(ex.ToString());
+    //        }
+    //        Draw();
+    //        return;
+    //    }
+    //    BoolParameter tmp1 = _parameter.TryCast<BoolParameter>();
+    //    if (tmp1 != null)
+    //    {
+    //        tmp1.overrideState = true;
+    //        try
+    //        {
+    //            tmp1.value = bool.Parse(code);
+    //        }
+    //        catch (Exception ex)
+    //        {
+    //            Console.WriteLine(ex.ToString());
+    //        }
+    //        Draw();
+    //        return;
+    //    }
+    //    ClampedFloatParameter tmp2 = _parameter.TryCast<ClampedFloatParameter>();
+    //    if (tmp2 != null)
+    //    {
+    //        tmp2.overrideState = true;
+    //        try
+    //        {
+    //            tmp2.value = float.Parse(code);
+    //        }
+    //        catch (Exception ex)
+    //        {
+    //            Console.WriteLine(ex.ToString());
+    //        }
+    //        Draw();
+    //        return;
+    //    }
+    //    ClampedIntParameter tmp3 = _parameter.TryCast<ClampedIntParameter>();
+    //    if (tmp3 != null)
+    //    {
+    //        tmp3.overrideState = true;
+    //        try
+    //        {
+    //            tmp3.value = int.Parse(code);
+    //        }
+    //        catch (Exception ex)
+    //        {
+    //            Console.WriteLine(ex.ToString());
+    //        }
+    //        Draw();
+    //        return;
+    //    }
+    //    Console.WriteLine("Failed");
+    //}
+    //public static void Draw()
+    //{
+    //    Camera camera = Camera.main;
+    //    var smr = GameObject.Find("o_upper_type01").GetComponent<SkinnedMeshRenderer>();
+    //    if (gameObjectMeshContainer == null)
+    //    {
+    //        gameObjectMeshContainer = new GameObject("test");            
+    //        Mesh mesh = new UnityEngine.Mesh();
+    //        smr.BakeMesh(mesh);
+
+    //        var uvs = mesh.uv;
+    //        if (uvs == null || uvs.Length == 0)
+    //        {
+    //            Console.WriteLine("No uv map, ignore");
+    //            return;
+    //        }
+
+    //        int xOffset;
+    //        int yOffset;
+
+    //        UnityEngine.Vector3[] verts = new UnityEngine.Vector3[uvs.Length];
+    //        // Transform mesh into a surface according to its uv
+    //        float minX = float.PositiveInfinity;
+    //        float minY = float.PositiveInfinity;
+    //        float maxX = float.NegativeInfinity;
+    //        float maxY = float.NegativeInfinity;
+    //        for (int uv = 0; uv < uvs.Length; uv++)
+    //        {
+    //            verts[uv] = new UnityEngine.Vector3(uvs[uv].x, uvs[uv].y, 0f);
+    //            minX = Mathf.Min(minX, uvs[uv].x);
+    //            maxX = Mathf.Max(maxX, uvs[uv].x);
+    //            minY = Mathf.Min(minY, uvs[uv].y);
+    //            maxY = Mathf.Max(maxY, uvs[uv].y);
+    //        }
+
+    //        xOffset = ((int)Math.Floor(minX));
+    //        yOffset = ((int)Math.Floor(minY));
+    //        int horizontalBlockCount = (int)Math.Ceiling(maxX) - xOffset;
+    //        int verticalBlockCount = (int)Math.Ceiling(maxY) - yOffset;
+
+    //        if (horizontalBlockCount == 0 || verticalBlockCount == 0)
+    //        {
+    //            horizontalBlockCount = 1;
+    //            verticalBlockCount = 1;
+    //            var v0 = verts[mesh.triangles[0]];
+    //            verts[mesh.triangles[1]].x = v0.x + 1;
+    //            verts[mesh.triangles[2]].y = v0.y + 1;
+    //        }
+
+    //        // Correct triangle if its normal direction is not positive z
+    //        int[] triangles = mesh.triangles;
+    //        for (int tri = 0; tri < triangles.Length; tri += 3)
+    //        {
+    //            var v0 = verts[triangles[tri]];
+    //            var v1 = verts[triangles[tri + 1]];
+    //            var v2 = verts[triangles[tri + 2]];
+
+    //            if (UnityEngine.Vector3.Cross(v1 - v0, v2 - v0).z > 0)
+    //            {
+    //                var tmp = triangles[tri + 1];
+    //                triangles[tri + 1] = triangles[tri + 2];
+    //                triangles[tri + 2] = tmp;
+    //            }
+    //        }
+
+    //        //uvIslandSolver(triangles, verts);
+
+    //        mesh.vertices = verts;
+    //        mesh.triangles = triangles;
+    //        mesh.RecalculateBounds();
+    //        mesh.RecalculateNormals();
+    //        mesh.RecalculateTangents();
+    //        gameObjectMeshContainer.AddComponent<MeshFilter>().sharedMesh = mesh;
+
+    //        positionFront = new UnityEngine.Vector3(-xOffset - horizontalBlockCount / 2.0f, yOffset + verticalBlockCount / 2.0f + 13f, 23f);
+    //        pa0 = 0.5f;
+    //        pa1 = 1;
+    //        camera.transform.position = positionFront;
+    //        camera.transform.hasChanged = true;
+    //    }
+    //    Matrix4x4 drawOffset = Matrix4x4.TRS(new UnityEngine.Vector3(0f, 13f, 22f), new UnityEngine.Quaternion(0f, 1f, 0f, 0f), UnityEngine.Vector3.one);
+    //    Mesh mesh1 = gameObjectMeshContainer.GetComponent<MeshFilter>().sharedMesh;
+    //    Camera.main.gameObject.GetComponent<CameraController>().enabled = false;
+    //    camera.orthographic = true;
+    //    camera.orthographicSize = 0.5f;
+    //    camera.aspect = 1;
+    //    camera.transform.position = positionFront;
+    //    camera.transform.rotation = new UnityEngine.Quaternion(0, 1, 0, 0);
+    //    camera.transform.hasChanged = true;
+    //    RenderTexture renderTexture = new RenderTexture(1024, 1024, 24, RenderTextureFormat.ARGB32);
+    //    Texture2D texture = new Texture2D(1024, 1024, TextureFormat.ARGB32, false);
+    //    renderTexture.antiAliasing = 1;
+    //    renderTexture.filterMode = FilterMode.Point;
+    //    renderTexture.Create();
+    //    camera.targetTexture = renderTexture;
+    //    camera.backgroundColor = Color.red;
+    //    Graphics.DrawMesh(mesh1, drawOffset, smr.sharedMaterial, smr.gameObject.layer, camera);
+    //    camera.Render();
+
+    //    RenderTexture.active = renderTexture;
+    //    texture.ReadPixels(new Rect(0, 0, 1024, 1024), 0, 0);
+    //    texture.Apply();
+    //    RenderTexture.active = null;
+    //    var data = texture.GetPixels32();
+    //    camera.targetTexture = null;
+    //    renderTexture.Release();
+    //    TextureSaver.SaveTexture(data, 1024, 1024, "test.png");
+    //    UnityEngine.Object.Destroy(renderTexture);
+    //    UnityEngine.Object.Destroy(texture);
+    //    Camera.main.gameObject.GetComponent<CameraController>().enabled = true;
+    //}
 	public string msg = "";
 
     public HashSet<string> ignoreList = new HashSet<string>
@@ -107,7 +294,7 @@ internal class PmxBuilder
 
 	private GameObject gameObjectMeshCopier;
 
-	private GameObject gameObjectMeshContainer;// Carrier of square mesh which is used to export light textures
+	private  GameObject gameObjectMeshContainer;// Carrier of square mesh which is used to export light textures
 
     private string charaName;
 
@@ -247,6 +434,30 @@ internal class PmxBuilder
             camera1.CopyFrom(camera);
         }
         Camera.main.gameObject.GetComponent<CameraController>().enabled = false;
+
+        GameObject globalVolume = GameObject.Find("Global Volume");
+        if (globalVolume != null)
+        {
+            try
+            {
+                var parameters = globalVolume.GetComponent<Volume>().m_InternalProfile.components[0].parameters;
+                parameters[194].TryCast<ClampedFloatParameter>().overrideState = true;
+                parameters[194].TryCast<ClampedFloatParameter>().value = 0;
+                parameters[195].TryCast<ClampedFloatParameter>().overrideState = true;
+                parameters[195].TryCast<ClampedFloatParameter>().value = 0;
+                parameters[205].TryCast<BoolParameter>().overrideState = true;
+                parameters[205].TryCast<BoolParameter>().value = false;
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Failed to get volume parameters");
+            }
+        }
+        else
+        {
+            Console.WriteLine("Global Volume not found");
+        }
 
         Mesh square = new Mesh();
 
